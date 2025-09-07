@@ -16,6 +16,20 @@ export default function Page() {
     localStorage.setItem("note", note);
   }, [note]);
 
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === "n") {
+      e.preventDefault();
+      setNote("");
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col bg-black text-white">
       {/* Navbar */}
