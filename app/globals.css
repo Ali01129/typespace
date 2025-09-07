@@ -24,3 +24,14 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Hide scrollbar for textarea (Webkit browsers: Chrome, Safari, Edge) */
+textarea.scrollbar-none::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* Hide scrollbar for textarea (Firefox) */
+textarea.scrollbar-none {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important; /* IE/Edge */
+}

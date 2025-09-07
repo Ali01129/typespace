@@ -1,36 +1,114 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 📝 TypeSpace (Working Title)
 
-## Getting Started
+A minimal **local-first note-taking app** built with Next.js, starting small with typewriter-style notes and scaling into a full SaaS product with collaboration, subscriptions, and mobile apps.
 
-First, run the development server:
+---
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## 🚀 Project Roadmap
+
+### ✅ Phase 1 (MVP)
+
+* [x] Local storage with a single note
+* [x] Typewriter-style font for distraction-free writing
+
+### ✅ Phase 2
+
+* [ ] Multiple notes/pages (IndexedDB or Dexie.js)
+* [ ] Markdown editor or Rich Text editor (TipTap / Slate.js)
+
+### ✅ Phase 3
+
+* [ ] Database (Postgres via Supabase + Prisma)
+* [ ] User authentication (Google login with NextAuth.js)
+
+### ✅ Phase 4
+
+* [ ] Real-time collaboration (WebSockets or Firestore)
+* [ ] Upload & resize images inside notes
+
+### ✅ Phase 5
+
+* [ ] Mobile app (React Native, reusing backend APIs)
+* [ ] Subscription plans (Stripe integration, paywall for >1 page)
+
+---
+
+## 📂 Folder Structure (Next.js 14 App Router)
+
+```
+my-notes-app/
+│── app/                     # Next.js app router
+│   ├── layout.tsx
+│   ├── page.tsx             # Home (note editor MVP)
+│   ├── notes/               # Multiple notes (Phase 2+)
+│   └── api/                 # API routes (Phase 3+)
+│
+│── components/              # Reusable UI components
+│── lib/                     # Utilities (db, auth helpers, etc.)
+│── styles/                  # Tailwind/global styles
+│── public/                  # Static assets (icons, logos)
+│── package.json
+│── next.config.js
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+* **Frontend**: Next.js 14 (App Router) + Tailwind CSS
+* **State & Local Storage**: React hooks + localStorage / IndexedDB
+* **Database (Phase 3)**: Postgres + Prisma (Supabase hosting)
+* **Auth (Phase 3)**: NextAuth.js (Google provider)
+* **Collaboration (Phase 4)**: WebSockets / Firestore
+* **Payments (Phase 5)**: Stripe subscriptions
+* **Mobile App (Phase 5)**: React Native (reusing backend)
 
-## Learn More
+---
 
-To learn more about Next.js, take a look at the following resources:
+## 📦 Installation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+# Clone the repo
+git clone https://github.com/ali01129
+cd typespace
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Install dependencies
+npm install
 
-## Deploy on Vercel
+# Run the development server
+npm run dev
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## ✨ Features (Current vs Future)
+
+* **Current**
+
+  * Typewriter font
+  * Auto-saving notes in browser
+
+* **Future**
+
+  * Multiple pages
+  * Rich text / Markdown support
+  * Google login & cloud sync
+  * Real-time collaboration
+  * Image upload & resizing
+  * Mobile app support
+  * Subscription paywall
+
+---
+
+## 📌 License
+
+MIT License © 2025 \[Your Name]
+
+---
+
+## 🌟 Contributing
+
+Contributions are welcome!
+Feel free to fork this project and submit a pull request.
