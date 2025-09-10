@@ -24,7 +24,7 @@ export default function Page() {
   }, []);
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === "n") {
+    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === "c") {
       e.preventDefault();
       setNote("");
     }
