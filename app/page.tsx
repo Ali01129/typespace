@@ -1,11 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import Navbar from "../components/Navbar";
+import { zustandStore } from '../zustand/store';
+import { useKeyboardShortcuts } from '../hooks/useKeyboardShortcuts';
 
 export default function Page() {
-  const [note, setNote] = useState("");
+  const { note, setNote } = zustandStore();
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Use the custom keyboard shortcuts hook
+  useKeyboardShortcuts();
 
   useEffect(() => {
     const savedNote = localStorage.getItem("note");
@@ -15,20 +20,6 @@ export default function Page() {
   useEffect(() => {
     localStorage.setItem("note", note);
   }, [note]);
-
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
-
-  const handleKeyDown = (e: KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.altKey && e.key.toLowerCase() === "c") {
-      e.preventDefault();
-      setNote("");
-    }
-  };
 
   return (
     <main className="flex min-h-screen flex-col bg-black text-white">

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import {
   Copy,
   MonitorDown,
+  MonitorUp,
   CheckCheck,
   LaptopMinimal,
   MoreHorizontal,
@@ -73,15 +74,24 @@ export default function Navbar({ note }: NavbarProps) {
           {copied ? <CheckCheck size={20} /> : <Copy size={20} />}
         </button>
 
-        {/* Download */}
         <button
-          onClick={() => alert("Download feature coming soon!")}
           className={`p-2 rounded-md transition-colors ${
             note.trim()
               ? "hover:bg-[#262626] cursor-pointer"
               : "cursor-not-allowed text-gray-500"
           }`}
-          title="Download"
+          title="Share"
+        >
+          <MonitorUp size={20} />
+        </button>
+
+        <button
+          className={`p-2 rounded-md transition-colors ${
+            note.trim()
+              ? "hover:bg-[#262626] cursor-pointer"
+              : "cursor-not-allowed text-gray-500"
+          }`}
+          title="Recieve"
         >
           <MonitorDown size={20} />
         </button>
