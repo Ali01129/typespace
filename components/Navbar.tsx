@@ -10,6 +10,8 @@ import {
   MoreHorizontal,
 } from "lucide-react";
 import Options from "./Options";
+import ShareModal from "./ShareModal";
+import RetrieveModal from "./RetrieveModal";
 
 type NavbarProps = {
   note: string;
@@ -19,6 +21,8 @@ export default function Navbar({ note }: NavbarProps) {
   const wordCount = note.trim() === "" ? 0 : note.trim().split(/\s+/).length;
   const [copied, setCopied] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [isRetrieveModalOpen, setIsRetrieveModalOpen] = useState(false);
   const optionsRef = useRef<HTMLDivElement>(null);
 
   const handleCopy = () => {
@@ -71,10 +75,12 @@ export default function Navbar({ note }: NavbarProps) {
           }`}
           title="Copy to clipboard"
         >
-          {copied ? <CheckCheck size={20} /> : <Copy size={20} />}
+          {copied ? <CheckCheck size={20} color="green" /> : <Copy size={20} />}
         </button>
 
         <button
+          onClick={() => setIsShareModalOpen(true)}
+          disabled={!note.trim()}
           className={`p-2 rounded-md transition-colors ${
             note.trim()
               ? "hover:bg-[#262626] cursor-pointer"
@@ -86,11 +92,8 @@ export default function Navbar({ note }: NavbarProps) {
         </button>
 
         <button
-          className={`p-2 rounded-md transition-colors ${
-            note.trim()
-              ? "hover:bg-[#262626] cursor-pointer"
-              : "cursor-not-allowed text-gray-500"
-          }`}
+          onClick={()=> setIsRetrieveModalOpen(true)}
+          className={"p-2 rounded-md transition-colors hover:bg-[#262626] cursor-pointer"}
           title="Recieve"
         >
           <MonitorDown size={20} />
@@ -109,6 +112,15 @@ export default function Navbar({ note }: NavbarProps) {
           {showOptions && <Options />}
         </div>
       </div>
+
+      <ShareModal 
+        isOpen={isShareModalOpen} 
+        onClose={() => setIsShareModalOpen(false)} 
+      />
+      <RetrieveModal 
+        isOpen={isRetrieveModalOpen} 
+        onClose={() => setIsRetrieveModalOpen(false)} 
+      />
     </nav>
   );
 }
