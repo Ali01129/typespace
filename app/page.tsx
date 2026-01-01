@@ -20,7 +20,7 @@ export default function Page() {
   useEffect(() => {
     const savedNote = localStorage.getItem("note");
     if (savedNote) setNote(savedNote);
-  }, []);
+  }, [setNote]);
 
   // Save to localStorage
   useEffect(() => {
@@ -32,27 +32,24 @@ export default function Page() {
     const value = e.target.value;
     const lines = value.split("\n");
     const result: string[] = [];
-  
+
     for (let line of lines) {
       while (line.length > MAX_CHARS_PER_LINE) {
-        // Find last space within limit
         let breakIndex = line.lastIndexOf(" ", MAX_CHARS_PER_LINE);
-  
-        // If no space found (very long word), force break
+
         if (breakIndex === -1) {
           breakIndex = MAX_CHARS_PER_LINE;
         }
-  
+
         result.push(line.slice(0, breakIndex));
         line = line.slice(breakIndex).trimStart();
       }
-  
+
       result.push(line);
     }
-  
+
     setNote(result.join("\n"));
   };
-  
 
   // Active line calculation
   const updateActiveLine = () => {
@@ -77,29 +74,30 @@ export default function Page() {
       <Navbar note={note} />
 
       <div className="flex-1 flex justify-center p-4">
-        <div className="w-full max-w-5xl h-[70vh] flex rounded-lg overflow-hidden bg-black">
-          
+        <div className="w-full max-w-5xl h-[84vh] flex rounded-lg overflow-hidden bg-black">
+
           {/* Line Numbers */}
           <div
             ref={lineNumbersRef}
-            className="px-3 pt-4 font-mono text-sm overflow-y-scroll scrollbar-none select-none"
-            style={{ width: "60px" }}
+            className="w-[60px] overflow-y-scroll scrollbar-none select-none font-mono text-sm"
           >
-            {Array.from({ length: totalLines }, (_, i) => i + 1).map(
-              (lineNum) => (
-                <div
-                  key={lineNum}
-                  className={`flex items-center justify-end pr-1 ${
-                    lineNum === activeLine
-                      ? "text-white"
-                      : "text-gray-500"
-                  }`}
-                  style={{ height: LINE_HEIGHT }}
-                >
-                  {lineNum}
-                </div>
-              )
-            )}
+            <div className="py-4 px-3">
+              {Array.from({ length: totalLines }, (_, i) => i + 1).map(
+                (lineNum) => (
+                  <div
+                    key={lineNum}
+                    className={`flex items-center justify-end pr-1 ${
+                      lineNum === activeLine
+                        ? "text-white"
+                        : "text-gray-500"
+                    }`}
+                    style={{ height: LINE_HEIGHT }}
+                  >
+                    {lineNum}
+                  </div>
+                )
+              )}
+            </div>
           </div>
 
           {/* Textarea */}
@@ -113,7 +111,6 @@ export default function Page() {
             placeholder="Start typing..."
             className="
               flex-1
-              p-4
               font-mono text-sm
               bg-black text-white
               resize-none
@@ -121,6 +118,7 @@ export default function Page() {
               overflow-y-scroll
               scrollbar-none
               whitespace-pre-wrap
+              py-4 px-4
             "
             style={{
               lineHeight: LINE_HEIGHT,
