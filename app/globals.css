@@ -37,3 +37,10 @@ div.scrollbar-none {
   scrollbar-width: none !important;
   -ms-overflow-style: none !important; /* IE/Edge */
 }
+
+/* ContentEditable placeholder styling */
+[contenteditable][data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: #6b7280;
+  pointer-events: none;
+}

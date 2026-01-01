@@ -18,7 +18,18 @@ type NavbarProps = {
 };
 
 export default function Navbar({ note }: NavbarProps) {
-  const wordCount = note.trim() === "" ? 0 : note.trim().split(/\s+/).length;
+  // Convert HTML to plain text for word counting and copying
+  const getPlainText = (html: string): string => {
+    if (typeof document === "undefined") {
+      return html.replace(/<[^>]*>/g, "");
+    }
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    return tempDiv.textContent || tempDiv.innerText || "";
+  };
+
+  const plainText = getPlainText(note);
+  const wordCount = plainText.trim() === "" ? 0 : plainText.trim().split(/\s+/).length;
   const [copied, setCopied] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -26,9 +37,9 @@ export default function Navbar({ note }: NavbarProps) {
   const optionsRef = useRef<HTMLDivElement>(null);
 
   const handleCopy = () => {
-    if (!note.trim()) return;
+    if (!plainText.trim()) return;
 
-    navigator.clipboard.writeText(note);
+    navigator.clipboard.writeText(plainText);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -67,9 +78,9 @@ export default function Navbar({ note }: NavbarProps) {
         {/* Copy button */}
         <button
           onClick={handleCopy}
-          disabled={!note.trim()}
+          disabled={!plainText.trim()}
           className={`p-2 rounded-md transition-colors ${
-            note.trim()
+            plainText.trim()
               ? "hover:bg-[#262626] cursor-pointer"
               : "cursor-not-allowed text-gray-500"
           }`}
@@ -80,9 +91,9 @@ export default function Navbar({ note }: NavbarProps) {
 
         <button
           onClick={() => setIsShareModalOpen(true)}
-          disabled={!note.trim()}
+          disabled={!plainText.trim()}
           className={`p-2 rounded-md transition-colors ${
-            note.trim()
+            plainText.trim()
               ? "hover:bg-[#262626] cursor-pointer"
               : "cursor-not-allowed text-gray-500"
           }`}
