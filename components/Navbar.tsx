@@ -115,7 +115,8 @@ export default function Navbar({ note }: NavbarProps) {
 
       <ShareModal 
         isOpen={isShareModalOpen} 
-        onClose={() => setIsShareModalOpen(false)} 
+        onClose={() => setIsShareModalOpen(false)}
+        note={note}
       />
       <RetrieveModal 
         isOpen={isRetrieveModalOpen} 
