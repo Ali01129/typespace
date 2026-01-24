@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { FileText, X } from "lucide-react";
 import { zustandStore } from "@/zustand/store";
 import { loadUserFromStorage } from "@/components/UserHydration";
 import Navbar from "@/components/Navbar";
+
+const LINE_HEIGHT = "24px";
+const MAX_CHARS_PER_LINE = 80;
 
 type NoteItem = {
   id: string;
@@ -23,23 +26,11 @@ export default function AdminPage() {
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const handleDelete = async (id: string) => {
-    setDeletingId(id);
-    try {
-      const res = await fetch(`/api/admin/notes/${id}`, { method: "DELETE" });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error ?? "Failed to delete");
-      }
-      setNotes((prev) => prev.filter((n) => n.id !== id));
-    } catch {
-      // Could show a toast; for now we just stop loading
-    } finally {
-      setDeletingId(null);
-    }
-  };
+  const [selectedNote, setSelectedNote] = useState<NoteItem | null>(null);
+  const [editorContent, setEditorContent] = useState("");
+  const [activeLine, setActiveLine] = useState(1);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let u = user;
@@ -73,6 +64,64 @@ export default function AdminPage() {
     };
   }, [authChecked]);
 
+  const handleNoteClick = (note: NoteItem) => {
+    setSelectedNote(note);
+    setEditorContent(note.content || "");
+    setActiveLine(1);
+  };
+
+  const handleCloseTab = () => {
+    setSelectedNote(null);
+    setEditorContent("");
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    const lines = value.split("\n");
+    const result: string[] = [];
+
+    for (let line of lines) {
+      while (line.length > MAX_CHARS_PER_LINE) {
+        let breakIndex = line.lastIndexOf(" ", MAX_CHARS_PER_LINE);
+
+        if (breakIndex === -1) {
+          breakIndex = MAX_CHARS_PER_LINE;
+        }
+
+        result.push(line.slice(0, breakIndex));
+        line = line.slice(breakIndex).trimStart();
+      }
+
+      result.push(line);
+    }
+
+    const newContent = result.join("\n");
+    setEditorContent(newContent);
+    
+    // Update the note in the notes array
+    if (selectedNote) {
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === selectedNote.id ? { ...n, content: newContent } : n
+        )
+      );
+    }
+  };
+
+  const updateActiveLine = () => {
+    if (!textareaRef.current) return;
+
+    const cursorPosition = textareaRef.current.selectionStart;
+    const textBeforeCursor = editorContent.slice(0, cursorPosition);
+    setActiveLine(textBeforeCursor.split("\n").length);
+  };
+
+  const handleScroll = () => {
+    if (textareaRef.current && lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = textareaRef.current.scrollTop;
+    }
+  };
+
   if (!authChecked) {
     return (
       <main className="flex min-h-screen flex-col bg-black text-white">
@@ -88,68 +137,167 @@ export default function AdminPage() {
     );
   }
 
-  const formatDate = (d: string) => {
-    try {
-      return new Date(d).toLocaleString();
-    } catch {
-      return d;
-    }
-  };
+  const totalLines = editorContent.split("\n").length || 1;
 
   return (
-    <main className="flex min-h-screen flex-col bg-black text-white">
+    <main className="flex h-screen flex-col bg-[#0d1117] text-white overflow-hidden">
       <Navbar note="" admin />
 
-      <div className="flex-1 flex justify-center p-4">
-        <div className="w-full max-w-5xl h-[84vh] flex rounded-lg overflow-hidden bg-black">
-          <div className="flex-1 overflow-y-auto scrollbar-none font-mono text-sm py-4 px-4">
+      <div className="flex-1 flex overflow-hidden p-2 gap-2 min-h-0">
+        {/* Left Sidebar - Modern VS Code style */}
+        <div className="w-72 bg-[#1e1e1e] border border-[#2d2d30] rounded-lg flex flex-col shadow-lg overflow-hidden h-full">
+          {/* Title */}
+          <div className="px-5 py-4 border-b border-[#2d2d30] bg-[#252526] rounded-t-lg flex-shrink-0">
+            <h2 className="text-white font-semibold text-sm tracking-wide">
+              TYPESPACE
+            </h2>
+            <p className="text-[#858585] text-xs mt-1 font-normal">
+              {notes.length} {notes.length === 1 ? "note" : "notes"}
+            </p>
+          </div>
+
+          {/* File List */}
+          <div className="flex-1 overflow-y-auto scrollbar-none min-h-0">
             {loading ? (
-              <p className="text-gray-400">Loading...</p>
+              <div className="px-5 py-8 flex flex-col items-center justify-center">
+                <div className="w-6 h-6 border-2 border-[#007acc] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <p className="text-[#858585] text-xs">Loading notes...</p>
+              </div>
             ) : notes.length === 0 ? (
-              <p className="text-gray-400">No notes yet.</p>
+              <div className="px-5 py-8 flex flex-col items-center justify-center text-center">
+                <FileText size={32} className="text-[#3e3e42] mb-3" />
+                <p className="text-[#858585] text-sm font-medium">No notes yet</p>
+                <p className="text-[#5a5a5a] text-xs mt-1">
+                  Notes will appear here
+                </p>
+              </div>
             ) : (
-              <ul className="space-y-4">
-                {notes.map((n) => (
-                  <li
-                    key={n.id}
-                    className="border border-white rounded-lg p-4"
+              <div className="py-2 px-2">
+                {notes.map((note) => (
+                  <button
+                    key={note.id}
+                    onClick={() => handleNoteClick(note)}
+                    className={`w-full px-4 py-2.5 text-left flex items-center gap-3 group transition-all duration-150 rounded-md ${
+                      selectedNote?.id === note.id
+                        ? "bg-[#2a2d2e] border-l-2 border-[#007acc] shadow-sm"
+                        : "hover:bg-[#252526] border-l-2 border-transparent"
+                    }`}
                   >
-                    <div className="flex items-center justify-between gap-2 mb-2">
-                      <div className="flex flex-wrap items-center gap-2 min-w-0">
-                        <span className="text-amber-500 font-mono">
-                          {n.code}
-                        </span>
-                        <span
-                          className={`font-mono text-xs px-2 py-0.5 rounded ${
-                            n.active
-                              ? "bg-green-900/30 text-green-400 border border-green-600"
-                              : "bg-red-900/20 text-red-400 border border-red-500"
-                          }`}
-                        >
-                          {n.active ? "active" : "inactive"}
-                        </span>
-                        <span className="text-gray-500 text-xs">
-                          {formatDate(n.createdAt)}
-                        </span>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(n.id)}
-                        disabled={deletingId === n.id}
-                        className="shrink-0 p-2 rounded-md transition-colors hover:bg-[#262626] text-gray-400 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Delete note"
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                    <p className="text-gray-300 whitespace-pre-wrap break-words">
-                      {n.content || "(empty)"}
-                    </p>
-                  </li>
+                    <FileText
+                      size={18}
+                      className={`transition-colors duration-150 ${
+                        selectedNote?.id === note.id
+                          ? "text-[#007acc]"
+                          : "text-[#858585] group-hover:text-[#a0a0a0]"
+                      }`}
+                    />
+                    <span
+                      className={`text-sm font-mono truncate flex-1 transition-colors duration-150 ${
+                        selectedNote?.id === note.id
+                          ? "text-white font-medium"
+                          : "text-[#cccccc] group-hover:text-white"
+                      }`}
+                    >
+                      {note.code}
+                    </span>
+                    {selectedNote?.id === note.id && (
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#007acc]"></div>
+                    )}
+                  </button>
                 ))}
-              </ul>
+              </div>
             )}
           </div>
+        </div>
+
+        {/* Right Side - Editor Area */}
+        <div className="flex-1 flex flex-col bg-[#0d1117] border border-[#2d2d30] rounded-lg overflow-hidden h-full min-h-0">
+          {selectedNote ? (
+            <>
+              {/* Tab Bar */}
+              <div className="bg-[#1e1e1e] border-b border-[#2d2d30] flex items-center min-h-[35px] rounded-t-lg flex-shrink-0">
+                <div className="flex items-center gap-2.5 px-4 py-2 bg-[#0d1117] border-r border-[#2d2d30] group rounded-tl-lg">
+                  <FileText size={14} className="text-[#858585] group-hover:text-[#007acc] transition-colors" />
+                  <span className="text-sm text-[#cccccc] font-mono">
+                    {selectedNote.code}
+                  </span>
+                  <button
+                    onClick={handleCloseTab}
+                    className="ml-1.5 hover:bg-[#2d2d30] rounded-md p-1 transition-all duration-150"
+                    title="Close"
+                  >
+                    <X size={12} className="text-[#858585] hover:text-white transition-colors" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Editor */}
+              <div className="flex-1 flex overflow-hidden rounded-b-lg min-h-0">
+                {/* Line Numbers */}
+                <div
+                  ref={lineNumbersRef}
+                  className="w-[60px] overflow-y-scroll scrollbar-none select-none font-mono text-sm bg-[#0d1117] border-r border-[#2d2d30] rounded-bl-lg"
+                >
+                  <div className="py-4 px-3">
+                    {Array.from({ length: totalLines }, (_, i) => i + 1).map(
+                      (lineNum) => (
+                        <div
+                          key={lineNum}
+                          className={`flex items-center justify-end pr-2 transition-colors ${
+                            lineNum === activeLine
+                              ? "text-[#007acc] font-medium"
+                              : "text-[#6e7681]"
+                          }`}
+                          style={{ height: LINE_HEIGHT }}
+                        >
+                          {lineNum}
+                        </div>
+                      )
+                    )}
+                  </div>
+                </div>
+
+                {/* Textarea */}
+                <textarea
+                  ref={textareaRef}
+                  value={editorContent}
+                  onChange={handleChange}
+                  onKeyUp={updateActiveLine}
+                  onClick={updateActiveLine}
+                  onScroll={handleScroll}
+                  placeholder="Start typing..."
+                  className="
+                    flex-1
+                    font-mono text-sm
+                    bg-[#0d1117] text-[#c9d1d9]
+                    resize-none
+                    focus:outline-none
+                    overflow-y-scroll
+                    scrollbar-none
+                    whitespace-pre-wrap
+                    py-4 px-6
+                    caret-[#007acc]
+                    selection:bg-[#264f78]
+                  "
+                  style={{
+                    lineHeight: LINE_HEIGHT,
+                  }}
+                />
+              </div>
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
+              <div className="mb-4 p-6 rounded-xl bg-[#1e1e1e] border border-[#2d2d30] shadow-sm">
+                <FileText size={48} className="text-[#3e3e42] mx-auto" />
+              </div>
+              <p className="text-[#858585] font-mono text-sm font-medium mb-1">
+                No file selected
+              </p>
+              <p className="text-[#5a5a5a] text-xs max-w-sm">
+                Select a note from the sidebar to view and edit its contents
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </main>
