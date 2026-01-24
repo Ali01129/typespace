@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
 import { zustandStore } from "@/zustand/store";
 import { loadUserFromStorage } from "@/components/UserHydration";
 import Navbar from "@/components/Navbar";
@@ -22,6 +23,23 @@ export default function AdminPage() {
   const [notes, setNotes] = useState<NoteItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    setDeletingId(id);
+    try {
+      const res = await fetch(`/api/admin/notes/${id}`, { method: "DELETE" });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Failed to delete");
+      }
+      setNotes((prev) => prev.filter((n) => n.id !== id));
+    } catch {
+      // Could show a toast; for now we just stop loading
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     let u = user;
@@ -96,22 +114,33 @@ export default function AdminPage() {
                     key={n.id}
                     className="border border-white rounded-lg p-4"
                   >
-                    <div className="flex flex-wrap items-center gap-2 mb-2">
-                      <span className="text-amber-500 font-mono">
-                        {n.code}
-                      </span>
-                      <span
-                        className={`font-mono text-xs px-2 py-0.5 rounded ${
-                          n.active
-                            ? "bg-green-900/30 text-green-400 border border-green-600"
-                            : "bg-red-900/20 text-red-400 border border-red-500"
-                        }`}
+                    <div className="flex items-center justify-between gap-2 mb-2">
+                      <div className="flex flex-wrap items-center gap-2 min-w-0">
+                        <span className="text-amber-500 font-mono">
+                          {n.code}
+                        </span>
+                        <span
+                          className={`font-mono text-xs px-2 py-0.5 rounded ${
+                            n.active
+                              ? "bg-green-900/30 text-green-400 border border-green-600"
+                              : "bg-red-900/20 text-red-400 border border-red-500"
+                          }`}
+                        >
+                          {n.active ? "active" : "inactive"}
+                        </span>
+                        <span className="text-gray-500 text-xs">
+                          {formatDate(n.createdAt)}
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(n.id)}
+                        disabled={deletingId === n.id}
+                        className="shrink-0 p-2 rounded-md transition-colors hover:bg-[#262626] text-gray-400 hover:text-red-400 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Delete note"
                       >
-                        {n.active ? "active" : "inactive"}
-                      </span>
-                      <span className="text-gray-500 text-xs">
-                        {formatDate(n.createdAt)}
-                      </span>
+                        <Trash2 size={18} />
+                      </button>
                     </div>
                     <p className="text-gray-300 whitespace-pre-wrap break-words">
                       {n.content || "(empty)"}
