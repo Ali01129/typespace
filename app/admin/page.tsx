@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, X } from "lucide-react";
+import { FileText, Trash2, X } from "lucide-react";
 import { zustandStore } from "@/zustand/store";
 import { loadUserFromStorage } from "@/components/UserHydration";
 import Navbar from "@/components/Navbar";
@@ -73,6 +73,19 @@ export default function AdminPage() {
   const handleCloseTab = () => {
     setSelectedNote(null);
     setEditorContent("");
+  };
+
+  const handleDeleteNote = async (e: React.MouseEvent, note: NoteItem) => {
+    e.stopPropagation();
+    if (!confirm(`Delete note "${note.code}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/notes/${note.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error("Failed to delete");
+      setNotes((prev) => prev.filter((n) => n.id !== note.id));
+      if (selectedNote?.id === note.id) handleCloseTab();
+    } catch {
+      alert("Failed to delete note.");
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -174,36 +187,48 @@ export default function AdminPage() {
             ) : (
               <div className="py-2 px-2">
                 {notes.map((note) => (
-                  <button
+                  <div
                     key={note.id}
-                    onClick={() => handleNoteClick(note)}
-                    className={`w-full px-4 py-2.5 text-left flex items-center gap-3 group transition-all duration-150 rounded-md ${
+                    className={`flex items-center gap-1 rounded-md group/row ${
                       selectedNote?.id === note.id
                         ? "bg-[#2a2d2e] border-l-2 border-[#e2b714] shadow-sm"
                         : "hover:bg-[#252526] border-l-2 border-transparent"
                     }`}
                   >
-                    <FileText
-                      size={18}
-                      className={`transition-colors duration-150 ${
+                    <button
+                      onClick={() => handleNoteClick(note)}
+                      className={`flex-1 min-w-0 px-4 py-2.5 text-left flex items-center gap-3 transition-all duration-150 rounded-md ${
                         selectedNote?.id === note.id
-                          ? "text-[#e2b714]"
-                          : "text-[#858585] group-hover:text-[#a0a0a0]"
-                      }`}
-                    />
-                    <span
-                      className={`text-sm font-mono truncate flex-1 transition-colors duration-150 ${
-                        selectedNote?.id === note.id
-                          ? "text-white font-medium"
-                          : "text-[#cccccc] group-hover:text-white"
+                          ? ""
+                          : "hover:bg-[#252526]"
                       }`}
                     >
-                      {note.code}
-                    </span>
-                    {selectedNote?.id === note.id && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#e2b714]"></div>
-                    )}
-                  </button>
+                      <FileText
+                        size={18}
+                        className={`flex-shrink-0 transition-colors duration-150 ${
+                          selectedNote?.id === note.id
+                            ? "text-[#e2b714]"
+                            : "text-[#858585] group-hover/row:text-[#a0a0a0]"
+                        }`}
+                      />
+                      <span
+                        className={`text-sm font-mono truncate flex-1 transition-colors duration-150 ${
+                          selectedNote?.id === note.id
+                            ? "text-white font-medium"
+                            : "text-[#cccccc] group-hover/row:text-white"
+                        }`}
+                      >
+                        {note.code}
+                      </span>
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteNote(e, note)}
+                      className="flex-shrink-0 p-2 rounded-md text-[#6e7681] hover:text-red-400 hover:bg-[#2d2d30] transition-colors mr-2"
+                      title="Delete note"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
                 ))}
               </div>
             )}
