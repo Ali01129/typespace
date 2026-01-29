@@ -160,7 +160,7 @@ export default function AdminPage() {
           <div className="flex-1 overflow-y-auto scrollbar-none min-h-0">
             {loading ? (
               <div className="px-5 py-8 flex flex-col items-center justify-center">
-                <div className="w-6 h-6 border-2 border-[#007acc] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <div className="w-6 h-6 border-2 border-[#e2b714] border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-[#858585] text-xs">Loading notes...</p>
               </div>
             ) : notes.length === 0 ? (
@@ -179,7 +179,7 @@ export default function AdminPage() {
                     onClick={() => handleNoteClick(note)}
                     className={`w-full px-4 py-2.5 text-left flex items-center gap-3 group transition-all duration-150 rounded-md ${
                       selectedNote?.id === note.id
-                        ? "bg-[#2a2d2e] border-l-2 border-[#007acc] shadow-sm"
+                        ? "bg-[#2a2d2e] border-l-2 border-[#e2b714] shadow-sm"
                         : "hover:bg-[#252526] border-l-2 border-transparent"
                     }`}
                   >
@@ -187,7 +187,7 @@ export default function AdminPage() {
                       size={18}
                       className={`transition-colors duration-150 ${
                         selectedNote?.id === note.id
-                          ? "text-[#007acc]"
+                          ? "text-[#e2b714]"
                           : "text-[#858585] group-hover:text-[#a0a0a0]"
                       }`}
                     />
@@ -201,7 +201,7 @@ export default function AdminPage() {
                       {note.code}
                     </span>
                     {selectedNote?.id === note.id && (
-                      <div className="w-1.5 h-1.5 rounded-full bg-[#007acc]"></div>
+                      <div className="w-1.5 h-1.5 rounded-full bg-[#e2b714]"></div>
                     )}
                   </button>
                 ))}
@@ -217,7 +217,7 @@ export default function AdminPage() {
               {/* Tab Bar */}
               <div className="bg-[#1e1e1e] border-b border-[#2d2d30] flex items-center min-h-[35px] rounded-t-lg flex-shrink-0">
                 <div className="flex items-center gap-2.5 px-4 py-2 bg-[#0d1117] border-r border-[#2d2d30] group rounded-tl-lg">
-                  <FileText size={14} className="text-[#858585] group-hover:text-[#007acc] transition-colors" />
+                  <FileText size={14} className="text-[#858585] group-hover:text-[#e2b714] transition-colors" />
                   <span className="text-sm text-[#cccccc] font-mono">
                     {selectedNote.code}
                   </span>
@@ -245,7 +245,7 @@ export default function AdminPage() {
                           key={lineNum}
                           className={`flex items-center justify-end pr-2 transition-colors ${
                             lineNum === activeLine
-                              ? "text-[#007acc] font-medium"
+                              ? "text-[#e2b714] font-medium"
                               : "text-[#6e7681]"
                           }`}
                           style={{ height: LINE_HEIGHT }}
@@ -276,7 +276,7 @@ export default function AdminPage() {
                     scrollbar-none
                     whitespace-pre-wrap
                     py-4 px-6
-                    caret-[#007acc]
+                    caret-[#e2b714]
                     selection:bg-[#264f78]
                   "
                   style={{

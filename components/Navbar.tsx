@@ -68,8 +68,11 @@ export default function Navbar({ note, admin = false }: NavbarProps) {
   if (admin) {
     return (
       <nav className="relative flex items-center justify-between px-6 py-3 bg-black text-white">
-        <div className="text-xl font-bold tracking-wider cursor-pointer">
+        <div className="text-xl font-bold tracking-wider cursor-pointer w-10">
           <LaptopMinimal size={24} className="inline-block mr-2" />
+        </div>
+        <div className="absolute left-1/2 -translate-x-1/2 text-lg font-bold tracking-wider text-[#e2b714]">
+          TypeSpace
         </div>
         <div className="relative" ref={optionsRef}>
           <button
