@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Save, Trash2, X } from "lucide-react";
+import { FilePlus, FileText, Save, Trash2, X } from "lucide-react";
 import { zustandStore } from "@/zustand/store";
 import { loadUserFromStorage } from "@/components/UserHydration";
 import Navbar from "@/components/Navbar";
@@ -73,6 +73,28 @@ export default function AdminPage() {
   const handleCloseTab = () => {
     setSelectedNote(null);
     setEditorContent("");
+  };
+
+  const handleCreateNote = async () => {
+    try {
+      const res = await fetch("/api/admin/notes", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.note) throw new Error(data.error || "Failed to create");
+      const newNote: NoteItem = {
+        id: data.note.id,
+        content: data.note.content ?? "",
+        code: data.note.code,
+        active: data.note.active ?? true,
+        createdAt: data.note.createdAt,
+        expiresAt: data.note.expiresAt,
+      };
+      setNotes((prev) => [newNote, ...prev]);
+      setSelectedNote(newNote);
+      setEditorContent("");
+      setActiveLine(1);
+    } catch {
+      alert("Failed to create note.");
+    }
   };
 
   const isDirty =
@@ -186,13 +208,17 @@ export default function AdminPage() {
         {/* Left Sidebar - Modern VS Code style */}
         <div className="w-72 bg-[#1e1e1e] border border-[#2d2d30] rounded-lg flex flex-col shadow-lg overflow-hidden h-full">
           {/* Title */}
-          <div className="px-5 py-4 border-b border-[#2d2d30] bg-[#252526] rounded-t-lg flex-shrink-0">
-            <h2 className="text-white font-semibold text-sm tracking-wide">
-              TYPESPACE
-            </h2>
-            <p className="text-[#858585] text-xs mt-1 font-normal">
+          <div className="px-4 py-2.5 border-b border-[#2d2d30] bg-[#252526] rounded-t-lg flex-shrink-0 flex items-center justify-between">
+            <p className="text-[#858585] text-xs font-normal">
               {notes.length} {notes.length === 1 ? "note" : "notes"}
             </p>
+            <button
+              onClick={handleCreateNote}
+              className="p-1.5 rounded-md text-[#858585] hover:text-[#e2b714] hover:bg-[#2d2d30] transition-colors"
+              title="Create note"
+            >
+              <FilePlus size={15} />
+            </button>
           </div>
 
           {/* File List */}
