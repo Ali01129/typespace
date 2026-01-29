@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { ObjectId } from "mongodb";
 import { getDb } from "@/lib/mongodb";
 import { generateShareCode } from "@/lib/codeGenerator";
 
@@ -9,10 +10,22 @@ type NoteDoc = {
   active: boolean;
   createdAt: Date;
   expiresAt: Date;
+  createdBy?: { toString(): string };
 };
 
-export async function POST() {
+export async function POST(request: NextRequest) {
   try {
+    let createdBy: ObjectId | undefined;
+    try {
+      const body = await request.json().catch(() => ({}));
+      const userId = body?.userId;
+      if (userId && typeof userId === "string") {
+        createdBy = new ObjectId(userId);
+      }
+    } catch {
+      // no body or invalid, leave createdBy undefined
+    }
+
     const db = await getDb();
     const notes = db.collection("notes");
 
@@ -38,13 +51,16 @@ export async function POST() {
     const createdAt = new Date();
     const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
 
-    const result = await notes.insertOne({
+    const doc: Record<string, unknown> = {
       content: "",
       code,
       active: true,
       createdAt,
       expiresAt,
-    });
+    };
+    if (createdBy) doc.createdBy = createdBy;
+
+    const result = await notes.insertOne(doc);
 
     const id = result.insertedId.toString();
     return NextResponse.json({
@@ -56,6 +72,7 @@ export async function POST() {
         active: true,
         createdAt,
         expiresAt,
+        ...(createdBy && { createdBy: createdBy.toString() }),
       },
     });
   } catch (error) {
@@ -84,6 +101,7 @@ export async function GET() {
       active: n.active,
       createdAt: n.createdAt,
       expiresAt: n.expiresAt,
+      ...(n.createdBy && { createdBy: n.createdBy.toString() }),
     }));
 
     return NextResponse.json({ success: true, notes: items });

@@ -1,16 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { getDb } from '@/lib/mongodb';
 import { generateShareCode } from '@/lib/codeGenerator';
 
 export async function POST(request: NextRequest) {
   try {
-    const { content } = await request.json();
+    const body = await request.json();
+    const { content, userId } = body;
 
     if (!content || typeof content !== 'string') {
       return NextResponse.json(
         { error: 'Content is required' },
         { status: 400 }
       );
+    }
+
+    let createdBy: ObjectId | undefined;
+    if (userId && typeof userId === 'string') {
+      try {
+        createdBy = new ObjectId(userId);
+      } catch {
+        // ignore invalid userId
+      }
     }
 
     const db = await getDb();
@@ -43,14 +54,17 @@ export async function POST(request: NextRequest) {
     const createdAt = new Date();
     const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
 
-    // Insert note into database
-    const result = await notesCollection.insertOne({
+    const doc: Record<string, unknown> = {
       content,
       code,
       active: true,
       createdAt,
       expiresAt,
-    });
+    };
+    if (createdBy) doc.createdBy = createdBy;
+
+    // Insert note into database
+    const result = await notesCollection.insertOne(doc);
 
     return NextResponse.json({
       success: true,

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FilePlus, FileText, Save, Trash2, X } from "lucide-react";
+import { FilePlus, FileText, Save, Trash2, User, X } from "lucide-react";
 import { zustandStore } from "@/zustand/store";
 import { loadUserFromStorage } from "@/components/UserHydration";
 import Navbar from "@/components/Navbar";
@@ -17,6 +17,7 @@ type NoteItem = {
   active: boolean;
   createdAt: string;
   expiresAt: string;
+  createdBy?: string;
 };
 
 export default function AdminPage() {
@@ -31,6 +32,14 @@ export default function AdminPage() {
   const [activeLine, setActiveLine] = useState(1);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const creatorBoxRef = useRef<HTMLDivElement>(null);
+  const [showCreatorBox, setShowCreatorBox] = useState(false);
+  const [creatorUser, setCreatorUser] = useState<{
+    id: string;
+    email: string;
+    role: string;
+  } | null>(null);
+  const [creatorLoading, setCreatorLoading] = useState(false);
 
   useEffect(() => {
     let u = user;
@@ -64,20 +73,64 @@ export default function AdminPage() {
     };
   }, [authChecked]);
 
+  // Close creator box when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        creatorBoxRef.current &&
+        !creatorBoxRef.current.contains(event.target as Node)
+      ) {
+        setShowCreatorBox(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  // Fetch creator user when opening the box
+  useEffect(() => {
+    if (!showCreatorBox || !selectedNote?.createdBy) {
+      setCreatorUser(null);
+      return;
+    }
+    let cancelled = false;
+    setCreatorLoading(true);
+    setCreatorUser(null);
+    fetch(`/api/admin/users/${selectedNote.createdBy}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (cancelled) return;
+        if (data.id) setCreatorUser({ id: data.id, email: data.email, role: data.role });
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setCreatorLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [showCreatorBox, selectedNote?.createdBy]);
+
   const handleNoteClick = (note: NoteItem) => {
     setSelectedNote(note);
     setEditorContent(note.content || "");
     setActiveLine(1);
+    setShowCreatorBox(false);
   };
 
   const handleCloseTab = () => {
     setSelectedNote(null);
     setEditorContent("");
+    setShowCreatorBox(false);
   };
 
   const handleCreateNote = async () => {
     try {
-      const res = await fetch("/api/admin/notes", { method: "POST" });
+      const res = await fetch("/api/admin/notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(user?.id ? { userId: user.id } : {}),
+      });
       const data = await res.json();
       if (!res.ok || !data.note) throw new Error(data.error || "Failed to create");
       const newNote: NoteItem = {
@@ -87,6 +140,7 @@ export default function AdminPage() {
         active: data.note.active ?? true,
         createdAt: data.note.createdAt,
         expiresAt: data.note.expiresAt,
+        ...(data.note.createdBy && { createdBy: data.note.createdBy }),
       };
       setNotes((prev) => [newNote, ...prev]);
       setSelectedNote(newNote);
@@ -311,18 +365,53 @@ export default function AdminPage() {
                     <X size={12} className="text-[#858585] hover:text-white transition-colors" />
                   </button>
                 </div>
-                <button
-                  onClick={handleSave}
-                  disabled={!isDirty}
-                  className={`p-2 rounded-md transition-colors duration-150 mr-2 ${
-                    isDirty
-                      ? "text-[#e2b714] hover:bg-[#2d2d30] cursor-pointer"
-                      : "text-[#6e7681] cursor-not-allowed"
-                  }`}
-                  title="Save"
-                >
-                  <Save size={20} />
-                </button>
+                <div className="flex items-center gap-2 mr-2">
+                  {selectedNote.createdBy && (
+                    <div className="relative" ref={creatorBoxRef}>
+                      <button
+                        type="button"
+                        onClick={() => setShowCreatorBox((prev) => !prev)}
+                        className="flex items-center p-2 text-[#858585] hover:text-[#e2b714] hover:bg-[#2d2d30] rounded-md transition-colors"
+                        title="Created by user"
+                      >
+                        <User size={20} />
+                      </button>
+                      {showCreatorBox && (
+                        <div className="absolute right-0 top-full mt-1 w-60 px-3 py-3 bg-[#1e1e1e] border border-[#2d2d30] rounded-md shadow-lg z-50">
+                          <p className="text-[#858585] text-xs font-mono mb-1">
+                            Created by
+                          </p>
+                          {creatorLoading ? (
+                            <p className="text-[#cccccc] text-sm">Loading...</p>
+                          ) : creatorUser ? (
+                            <div className="space-y-1">
+                              <p className="text-white text-sm font-mono truncate">
+                                {creatorUser.email}
+                              </p>
+                              <p className="text-[#858585] text-xs font-mono">
+                                Role: {creatorUser.role}
+                              </p>
+                            </div>
+                          ) : (
+                            <p className="text-[#6e7681] text-sm">User not found</p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <button
+                    onClick={handleSave}
+                    disabled={!isDirty}
+                    className={`p-2 rounded-md transition-colors duration-150 ${
+                      isDirty
+                        ? "text-[#e2b714] hover:bg-[#2d2d30] cursor-pointer"
+                        : "text-[#6e7681] cursor-not-allowed"
+                    }`}
+                    title="Save"
+                  >
+                    <Save size={20} />
+                  </button>
+                </div>
               </div>
 
               {/* Editor */}
