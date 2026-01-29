@@ -14,6 +14,7 @@ import Options from "./Options";
 import ShareModal from "./ShareModal";
 import RetrieveModal from "./RetrieveModal";
 import SignInModal from "./SignInModal";
+import ThemeToggle from "./ThemeToggle";
 import { zustandStore } from "@/zustand/store";
 import { clearUserFromStorage } from "@/components/UserHydration";
 
@@ -148,6 +149,8 @@ export default function Navbar({ note, admin = false }: NavbarProps) {
         >
           <MonitorDown size={20} />
         </button>
+
+        <ThemeToggle />
 
         {/* Options dropdown */}
         <div className="relative" ref={optionsRef}>

@@ -9,7 +9,7 @@ type OptionsProps = {
 };
 
 export default function Options({ onSignInClick, onSignOutClick }: OptionsProps) {
-  const { user, theme, setTheme } = zustandStore();
+  const { user, theme } = zustandStore();
   const isSignedIn = !!user;
   const isLight = theme === "light";
 
@@ -42,16 +42,6 @@ export default function Options({ onSignInClick, onSignOutClick }: OptionsProps)
       >
         <span className="text-white font-mono">Clear page</span>
         <span className="text-gray-400 font-mono">ctrl+alt+c</span>
-      </button>
-      
-      <button
-        className="flex justify-between items-center w-full text-left px-4 py-2 text-xs rounded-md hover:bg-[#262626]"
-        onClick={() => setTheme(isLight ? "dark" : "light")}
-      >
-        <span className="text-white font-mono">
-          {isLight ? "Dark theme" : "Light theme"}
-        </span>
-        <span className="text-gray-400 font-mono">ctrl+alt+l</span>
       </button>
 
       <button
