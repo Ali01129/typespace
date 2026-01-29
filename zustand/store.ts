@@ -6,6 +6,8 @@ export type User = {
   role: 'user' | 'admin';
 };
 
+export type Theme = "light" | "dark";
+
 type store = {
   note: string
   setNote: (note: string) => void;
@@ -17,6 +19,9 @@ type store = {
 
   user: User | null;
   setUser: (user: User | null) => void;
+
+  theme: Theme;
+  setTheme: (theme: Theme) => void;
 };
 
 export const zustandStore = create<store>((set) => ({
@@ -30,4 +35,7 @@ export const zustandStore = create<store>((set) => ({
 
   user: null,
   setUser: (user: User | null) => set({ user }),
+
+  theme: "dark",
+  setTheme: (theme: Theme) => set({ theme }),
 }));

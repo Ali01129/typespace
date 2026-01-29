@@ -9,15 +9,32 @@ type OptionsProps = {
 };
 
 export default function Options({ onSignInClick, onSignOutClick }: OptionsProps) {
-  const { token, user } = zustandStore();
+  const { user, theme, setTheme } = zustandStore();
   const isSignedIn = !!user;
+  const isLight = theme === "light";
 
   return (
     <div className="absolute right-0 mt-2 w-60 px-2 py-2 bg-black border border-gray-400 rounded-md shadow-lg z-50">
       
-      <div className="flex justify-between items-center w-full text-left px-4 py-2 text-xs rounded-md hover:bg-[#262626]">
-        <span className="text-amber-500 font-mono py-1 px-2 bg-[#18181B] rounded">Token</span>
-        <span className="text-amber-500 font-mono py-1 px-2 bg-[#18181B] rounded">{token}</span>
+      <div
+        className={`flex justify-between items-center w-full text-left px-4 py-2 text-xs rounded-md ${
+          isLight ? "hover:bg-gray-100" : "hover:bg-[#262626]"
+        }`}
+      >
+        <span
+          className={`font-mono py-1 px-2 rounded ${
+            isLight ? "text-gray-700 bg-gray-200" : "text-amber-500 bg-[#18181B]"
+          }`}
+        >
+          Token
+        </span>
+        <span
+          className={`font-mono py-1 px-2 rounded ${
+            isLight ? "text-gray-700 bg-gray-200" : "text-amber-500 bg-[#18181B]"
+          }`}
+        >
+          coming soon
+        </span>
       </div>
 
       <button className="flex justify-between items-center w-full text-left px-4 py-2 text-xs rounded-md hover:bg-[#262626]"
@@ -27,8 +44,13 @@ export default function Options({ onSignInClick, onSignOutClick }: OptionsProps)
         <span className="text-gray-400 font-mono">ctrl+alt+c</span>
       </button>
       
-      <button className="flex justify-between items-center w-full text-left px-4 py-2 text-xs rounded-md hover:bg-[#262626]">
-        <span className="text-white font-mono">Light theme</span>
+      <button
+        className="flex justify-between items-center w-full text-left px-4 py-2 text-xs rounded-md hover:bg-[#262626]"
+        onClick={() => setTheme(isLight ? "dark" : "light")}
+      >
+        <span className="text-white font-mono">
+          {isLight ? "Dark theme" : "Light theme"}
+        </span>
         <span className="text-gray-400 font-mono">ctrl+alt+l</span>
       </button>
 

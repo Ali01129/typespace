@@ -12,6 +12,12 @@ export const useKeyboardShortcuts = () => {
           e.preventDefault();
           clearPage();
         }
+
+        if (isCtrlOrCmd && e.altKey && e.key.toLowerCase() === "l") {
+          e.preventDefault();
+          const { theme, setTheme } = zustandStore.getState();
+          setTheme(theme === "light" ? "dark" : "light");
+        }
       
       if (e.key === "F11") {
         e.preventDefault();
