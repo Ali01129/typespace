@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileText, Trash2, X } from "lucide-react";
+import { FileText, Save, Trash2, X } from "lucide-react";
 import { zustandStore } from "@/zustand/store";
 import { loadUserFromStorage } from "@/components/UserHydration";
 import Navbar from "@/components/Navbar";
@@ -73,6 +73,32 @@ export default function AdminPage() {
   const handleCloseTab = () => {
     setSelectedNote(null);
     setEditorContent("");
+  };
+
+  const isDirty =
+    selectedNote !== null &&
+    editorContent !== (selectedNote.content ?? "");
+
+  const handleSave = async () => {
+    if (!selectedNote || !isDirty) return;
+    try {
+      const res = await fetch(`/api/admin/notes/${selectedNote.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: editorContent }),
+      });
+      if (!res.ok) throw new Error("Failed to save");
+      setSelectedNote((prev) =>
+        prev ? { ...prev, content: editorContent } : null
+      );
+      setNotes((prev) =>
+        prev.map((n) =>
+          n.id === selectedNote.id ? { ...n, content: editorContent } : n
+        )
+      );
+    } catch {
+      alert("Failed to save note.");
+    }
   };
 
   const handleDeleteNote = async (e: React.MouseEvent, note: NoteItem) => {
@@ -240,20 +266,37 @@ export default function AdminPage() {
           {selectedNote ? (
             <>
               {/* Tab Bar */}
-              <div className="bg-[#1e1e1e] border-b border-[#2d2d30] flex items-center min-h-[35px] rounded-t-lg flex-shrink-0">
-                <div className="flex items-center gap-2.5 px-4 py-2 bg-[#0d1117] border-r border-[#2d2d30] group rounded-tl-lg">
-                  <FileText size={14} className="text-[#858585] group-hover:text-[#e2b714] transition-colors" />
-                  <span className="text-sm text-[#cccccc] font-mono">
+              <div className="bg-[#1e1e1e] border-b border-[#2d2d30] flex items-center justify-between min-h-[35px] rounded-t-lg flex-shrink-0">
+                <div className="flex items-center gap-2.5 px-4 py-2 min-w-[280px] max-w-[280px] bg-[#0d1117] border-r border-[#2d2d30] group rounded-tl-lg">
+                  <FileText size={14} className="text-[#858585] group-hover:text-[#e2b714] transition-colors flex-shrink-0" />
+                  <span className="text-sm text-[#cccccc] font-mono truncate flex-1 min-w-0">
                     {selectedNote.code}
                   </span>
+                  {isDirty && (
+                    <span className="text-[#e2b714] text-2xl font-mono flex-shrink-0" title="Unsaved changes">
+                      •
+                    </span>
+                  )}
                   <button
                     onClick={handleCloseTab}
-                    className="ml-1.5 hover:bg-[#2d2d30] rounded-md p-1 transition-all duration-150"
+                    className="flex-shrink-0 hover:bg-[#2d2d30] rounded-md p-1 transition-all duration-150"
                     title="Close"
                   >
                     <X size={12} className="text-[#858585] hover:text-white transition-colors" />
                   </button>
                 </div>
+                <button
+                  onClick={handleSave}
+                  disabled={!isDirty}
+                  className={`p-2 rounded-md transition-colors duration-150 mr-2 ${
+                    isDirty
+                      ? "text-[#e2b714] hover:bg-[#2d2d30] cursor-pointer"
+                      : "text-[#6e7681] cursor-not-allowed"
+                  }`}
+                  title="Save"
+                >
+                  <Save size={20} />
+                </button>
               </div>
 
               {/* Editor */}
