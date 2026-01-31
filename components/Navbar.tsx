@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Copy,
+  LayoutDashboard,
   MonitorDown,
   MonitorUp,
   CheckCheck,
@@ -12,18 +14,34 @@ import {
 import Options from "./Options";
 import ShareModal from "./ShareModal";
 import RetrieveModal from "./RetrieveModal";
+import SignInModal from "./SignInModal";
+import ThemeToggle from "./ThemeToggle";
+import { zustandStore } from "@/zustand/store";
+import { clearUserFromStorage } from "@/components/UserHydration";
 
 type NavbarProps = {
   note: string;
+  admin?: boolean;
 };
 
-export default function Navbar({ note }: NavbarProps) {
+export default function Navbar({ note, admin = false }: NavbarProps) {
+  const router = useRouter();
+  const user = zustandStore((s) => s.user);
+  const setUser = zustandStore((s) => s.setUser);
   const wordCount = note.trim() === "" ? 0 : note.trim().split(/\s+/).length;
   const [copied, setCopied] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [isRetrieveModalOpen, setIsRetrieveModalOpen] = useState(false);
+  const [isSignInModalOpen, setIsSignInModalOpen] = useState(false);
   const optionsRef = useRef<HTMLDivElement>(null);
+
+  const handleSignOut = () => {
+    setShowOptions(false);
+    setUser(null);
+    clearUserFromStorage();
+    router.push("/");
+  };
 
   const handleCopy = () => {
     if (!note.trim()) return;
@@ -49,6 +67,49 @@ export default function Navbar({ note }: NavbarProps) {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  if (admin) {
+    return (
+      <nav className="relative flex items-center justify-between px-6 py-3 bg-black text-white">
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="text-xl font-bold tracking-wider cursor-pointer w-10 p-0 border-0 bg-transparent text-inherit"
+          title="Go to home"
+        >
+          <LaptopMinimal size={24} className="inline-block mr-2" />
+        </button>
+        <div className="absolute left-1/2 -translate-x-1/2 text-lg font-bold tracking-wider text-[#c9a00d]">
+          TypeSpace
+        </div>
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <div className="relative" ref={optionsRef}>
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="hover:bg-[#262626] cursor-pointer p-2 rounded-md transition-colors"
+              title="Options"
+            >
+              <MoreHorizontal size={22} />
+            </button>
+            {showOptions && (
+              <Options
+                onSignInClick={() => {
+                  setShowOptions(false);
+                  setIsSignInModalOpen(true);
+                }}
+                onSignOutClick={handleSignOut}
+              />
+            )}
+          </div>
+        </div>
+        <SignInModal
+          isOpen={isSignInModalOpen}
+          onClose={() => setIsSignInModalOpen(false)}
+        />
+      </nav>
+    );
+  }
 
   return (
     <nav className="relative flex items-center justify-between px-6 py-3 bg-black text-white">
@@ -99,6 +160,18 @@ export default function Navbar({ note }: NavbarProps) {
           <MonitorDown size={20} />
         </button>
 
+        <button
+          onClick={() =>
+            user ? router.push("/admin") : setIsSignInModalOpen(true)
+          }
+          className="p-2 rounded-md transition-colors hover:bg-[#262626] cursor-pointer"
+          title="Admin"
+        >
+          <LayoutDashboard size={20} />
+        </button>
+
+        <ThemeToggle />
+
         {/* Options dropdown */}
         <div className="relative" ref={optionsRef}>
           <button
@@ -109,7 +182,15 @@ export default function Navbar({ note }: NavbarProps) {
             <MoreHorizontal size={22} />
           </button>
 
-          {showOptions && <Options />}
+          {showOptions && (
+            <Options
+              onSignInClick={() => {
+                setShowOptions(false);
+                setIsSignInModalOpen(true);
+              }}
+              onSignOutClick={handleSignOut}
+            />
+          )}
         </div>
       </div>
 
@@ -121,6 +202,10 @@ export default function Navbar({ note }: NavbarProps) {
       <RetrieveModal 
         isOpen={isRetrieveModalOpen} 
         onClose={() => setIsRetrieveModalOpen(false)} 
+      />
+      <SignInModal
+        isOpen={isSignInModalOpen}
+        onClose={() => setIsSignInModalOpen(false)}
       />
     </nav>
   );

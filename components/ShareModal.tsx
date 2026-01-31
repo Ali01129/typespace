@@ -2,6 +2,7 @@
 
 import { X, Copy, CheckCheck } from "lucide-react";
 import { useState, useEffect } from "react";
+import { zustandStore } from "@/zustand/store";
 
 export interface ShareModalProps {
   isOpen: boolean;
@@ -10,6 +11,7 @@ export interface ShareModalProps {
 }
 
 export default function ShareModal({ isOpen, onClose, note }: ShareModalProps) {
+  const user = zustandStore((s) => s.user);
   const [copied, setCopied] = useState(false);
   const [code, setCode] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -39,7 +41,10 @@ export default function ShareModal({ isOpen, onClose, note }: ShareModalProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ content: note }),
+        body: JSON.stringify({
+          content: note,
+          ...(user?.id && { userId: user.id }),
+        }),
       });
 
       const data = await response.json();
