@@ -84,13 +84,27 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    const { searchParams } = new URL(request.url);
+    const userId = searchParams.get("userId");
+
     const db = await getDb();
     const notes = db.collection("notes");
 
+    let query: Record<string, unknown> = {};
+    if (userId) {
+      try {
+        query = { createdBy: new ObjectId(userId) };
+      } catch {
+        return NextResponse.json(
+          { error: "Invalid userId" },
+          { status: 400 }
+        );
+      }
+    }
     const all = (await notes
-      .find({})
+      .find(query)
       .sort({ createdAt: -1 })
       .toArray()) as unknown as NoteDoc[];
 

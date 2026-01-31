@@ -47,7 +47,7 @@ export default function AdminPage() {
       u = loadUserFromStorage();
       if (u) setUser(u);
     }
-    if (!u || u.role !== "admin") {
+    if (!u) {
       router.replace("/");
       return;
     }
@@ -55,10 +55,14 @@ export default function AdminPage() {
   }, [user, setUser, router]);
 
   useEffect(() => {
-    if (!authChecked) return;
+    if (!authChecked || !user) return;
 
     let cancelled = false;
-    fetch("/api/admin/notes")
+    const url =
+      user.role === "admin"
+        ? "/api/admin/notes"
+        : `/api/admin/notes?userId=${user.id}`;
+    fetch(url)
       .then((r) => r.json())
       .then((data) => {
         if (cancelled) return;
@@ -71,7 +75,7 @@ export default function AdminPage() {
     return () => {
       cancelled = true;
     };
-  }, [authChecked]);
+  }, [authChecked, user]);
 
   // Close creator box when clicking outside
   useEffect(() => {
@@ -129,7 +133,7 @@ export default function AdminPage() {
       const res = await fetch("/api/admin/notes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(user?.id ? { userId: user.id } : {}),
+        body: JSON.stringify(user ? { userId: user.id } : {}),
       });
       const data = await res.json();
       if (!res.ok || !data.note) throw new Error(data.error || "Failed to create");
