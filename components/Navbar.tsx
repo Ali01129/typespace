@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
   Copy,
+  LayoutDashboard,
   MonitorDown,
   MonitorUp,
   CheckCheck,
@@ -25,6 +26,7 @@ type NavbarProps = {
 
 export default function Navbar({ note, admin = false }: NavbarProps) {
   const router = useRouter();
+  const user = zustandStore((s) => s.user);
   const setUser = zustandStore((s) => s.setUser);
   const wordCount = note.trim() === "" ? 0 : note.trim().split(/\s+/).length;
   const [copied, setCopied] = useState(false);
@@ -69,29 +71,37 @@ export default function Navbar({ note, admin = false }: NavbarProps) {
   if (admin) {
     return (
       <nav className="relative flex items-center justify-between px-6 py-3 bg-black text-white">
-        <div className="text-xl font-bold tracking-wider cursor-pointer w-10">
+        <button
+          type="button"
+          onClick={() => router.push("/")}
+          className="text-xl font-bold tracking-wider cursor-pointer w-10 p-0 border-0 bg-transparent text-inherit"
+          title="Go to home"
+        >
           <LaptopMinimal size={24} className="inline-block mr-2" />
-        </div>
-        <div className="absolute left-1/2 -translate-x-1/2 text-lg font-bold tracking-wider text-[#e2b714]">
+        </button>
+        <div className="absolute left-1/2 -translate-x-1/2 text-lg font-bold tracking-wider text-[#c9a00d]">
           TypeSpace
         </div>
-        <div className="relative" ref={optionsRef}>
-          <button
-            onClick={() => setShowOptions(!showOptions)}
-            className="hover:bg-[#262626] cursor-pointer p-2 rounded-md transition-colors"
-            title="Options"
-          >
-            <MoreHorizontal size={22} />
-          </button>
-          {showOptions && (
-            <Options
-              onSignInClick={() => {
-                setShowOptions(false);
-                setIsSignInModalOpen(true);
-              }}
-              onSignOutClick={handleSignOut}
-            />
-          )}
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
+          <div className="relative" ref={optionsRef}>
+            <button
+              onClick={() => setShowOptions(!showOptions)}
+              className="hover:bg-[#262626] cursor-pointer p-2 rounded-md transition-colors"
+              title="Options"
+            >
+              <MoreHorizontal size={22} />
+            </button>
+            {showOptions && (
+              <Options
+                onSignInClick={() => {
+                  setShowOptions(false);
+                  setIsSignInModalOpen(true);
+                }}
+                onSignOutClick={handleSignOut}
+              />
+            )}
+          </div>
         </div>
         <SignInModal
           isOpen={isSignInModalOpen}
@@ -148,6 +158,16 @@ export default function Navbar({ note, admin = false }: NavbarProps) {
           title="Recieve"
         >
           <MonitorDown size={20} />
+        </button>
+
+        <button
+          onClick={() =>
+            user ? router.push("/admin") : setIsSignInModalOpen(true)
+          }
+          className="p-2 rounded-md transition-colors hover:bg-[#262626] cursor-pointer"
+          title="Admin"
+        >
+          <LayoutDashboard size={20} />
         </button>
 
         <ThemeToggle />

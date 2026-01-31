@@ -15,7 +15,7 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className={`rounded-full p-2 duration-300 transition-transform border ${
+      className={`rounded-full p-2 duration-300 transition-transform border cursor-pointer ${
         isLight
           ? "bg-zinc-100 text-zinc-500 border-zinc-200 hover:bg-zinc-200"
           : "bg-[rgba(39,39,43,0.4)] text-[#33E092] border-zinc-800 hover:border-zinc-700"

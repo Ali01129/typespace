@@ -268,7 +268,7 @@ export default function AdminPage() {
             </p>
             <button
               onClick={handleCreateNote}
-              className="p-1.5 rounded-md text-[#858585] hover:text-[#e2b714] hover:bg-[#2d2d30] transition-colors"
+              className="p-1.5 rounded-md text-[#858585] hover:text-[#c9a00d] hover:bg-[#2d2d30] transition-colors cursor-pointer"
               title="Create note"
             >
               <FilePlus size={15} />
@@ -279,7 +279,7 @@ export default function AdminPage() {
           <div className="flex-1 overflow-y-auto scrollbar-none min-h-0">
             {loading ? (
               <div className="px-5 py-8 flex flex-col items-center justify-center">
-                <div className="w-6 h-6 border-2 border-[#e2b714] border-t-transparent rounded-full animate-spin mb-3"></div>
+                <div className="w-6 h-6 border-2 border-[#c9a00d] border-t-transparent rounded-full animate-spin mb-3"></div>
                 <p className="text-[#858585] text-xs">Loading notes...</p>
               </div>
             ) : notes.length === 0 ? (
@@ -297,7 +297,7 @@ export default function AdminPage() {
                     key={note.id}
                     className={`flex items-center gap-1 rounded-md group/row ${
                       selectedNote?.id === note.id
-                        ? "bg-[#2a2d2e] border-l-2 border-[#e2b714] shadow-sm"
+                        ? "bg-[#2a2d2e] border-l-2 border-[#c9a00d] shadow-sm"
                         : "hover:bg-[#252526] border-l-2 border-transparent"
                     }`}
                   >
@@ -313,7 +313,7 @@ export default function AdminPage() {
                         size={18}
                         className={`flex-shrink-0 transition-colors duration-150 ${
                           selectedNote?.id === note.id
-                            ? "text-[#e2b714]"
+                            ? "text-[#c9a00d]"
                             : "text-[#858585] group-hover/row:text-[#a0a0a0]"
                         }`}
                       />
@@ -329,7 +329,7 @@ export default function AdminPage() {
                     </button>
                     <button
                       onClick={(e) => handleDeleteNote(e, note)}
-                      className="flex-shrink-0 p-2 rounded-md text-[#6e7681] hover:text-red-400 hover:bg-[#2d2d30] transition-colors mr-2"
+                      className="flex-shrink-0 p-2 rounded-md text-[#6e7681] hover:text-red-400 hover:bg-[#2d2d30] transition-colors mr-2 cursor-pointer"
                       title="Delete note"
                     >
                       <Trash2 size={16} />
@@ -348,18 +348,18 @@ export default function AdminPage() {
               {/* Tab Bar */}
               <div className="bg-[#1e1e1e] border-b border-[#2d2d30] flex items-center justify-between min-h-[35px] rounded-t-lg flex-shrink-0">
                 <div className="flex items-center gap-2.5 px-4 py-2 min-w-[280px] max-w-[280px] bg-[#0d1117] border-r border-[#2d2d30] group rounded-tl-lg">
-                  <FileText size={14} className="text-[#858585] group-hover:text-[#e2b714] transition-colors flex-shrink-0" />
+                  <FileText size={14} className="text-[#858585] group-hover:text-[#c9a00d] transition-colors flex-shrink-0" />
                   <span className="text-sm text-[#cccccc] font-mono truncate flex-1 min-w-0">
                     {selectedNote.code}
                   </span>
                   {isDirty && (
-                    <span className="text-[#e2b714] text-2xl font-mono flex-shrink-0" title="Unsaved changes">
+                    <span className="text-[#c9a00d] text-2xl font-mono flex-shrink-0" title="Unsaved changes">
                       •
                     </span>
                   )}
                   <button
                     onClick={handleCloseTab}
-                    className="flex-shrink-0 hover:bg-[#2d2d30] rounded-md p-1 transition-all duration-150"
+                    className="flex-shrink-0 hover:bg-[#2d2d30] rounded-md p-1 transition-all duration-150 cursor-pointer"
                     title="Close"
                   >
                     <X size={12} className="text-[#858585] hover:text-white transition-colors" />
@@ -371,7 +371,7 @@ export default function AdminPage() {
                       <button
                         type="button"
                         onClick={() => setShowCreatorBox((prev) => !prev)}
-                        className="flex items-center p-2 text-[#858585] hover:text-[#e2b714] hover:bg-[#2d2d30] rounded-md transition-colors"
+                        className="flex items-center p-2 text-[#858585] hover:text-[#c9a00d] hover:bg-[#2d2d30] rounded-md transition-colors cursor-pointer"
                         title="Created by user"
                       >
                         <User size={20} />
@@ -402,9 +402,9 @@ export default function AdminPage() {
                   <button
                     onClick={handleSave}
                     disabled={!isDirty}
-                    className={`p-2 rounded-md transition-colors duration-150 ${
+                    className={`p-2 rounded-md transition-colors duration-150 cursor-pointer ${
                       isDirty
-                        ? "text-[#e2b714] hover:bg-[#2d2d30] cursor-pointer"
+                        ? "text-[#c9a00d] hover:bg-[#2d2d30]"
                         : "text-[#6e7681] cursor-not-allowed"
                     }`}
                     title="Save"
@@ -428,7 +428,7 @@ export default function AdminPage() {
                           key={lineNum}
                           className={`flex items-center justify-end pr-2 transition-colors ${
                             lineNum === activeLine
-                              ? "text-[#e2b714] font-medium"
+                              ? "text-[#c9a00d] font-medium"
                               : "text-[#6e7681]"
                           }`}
                           style={{ height: LINE_HEIGHT }}
@@ -459,7 +459,7 @@ export default function AdminPage() {
                     scrollbar-none
                     whitespace-pre-wrap
                     py-4 px-6
-                    caret-[#e2b714]
+                    caret-[#c9a00d]
                     selection:bg-[#264f78]
                   "
                   style={{
